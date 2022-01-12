@@ -1,6 +1,7 @@
 19.1
 -----
 * [*] Signup: Fixed bug where username selection screen could be pushed twice. [#17624]
+* [*] Added the "Share WordPress with a friend" row back to the Me screen.
 
 19.0
 -----
