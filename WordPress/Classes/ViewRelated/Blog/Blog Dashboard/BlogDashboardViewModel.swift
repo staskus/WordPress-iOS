@@ -2,6 +2,10 @@ import Foundation
 import UIKit
 import CoreData
 
+protocol BlogDashboardCardConfigurable {
+    func configure(blog: Blog, viewController: BlogDashboardViewController?)
+}
+
 class BlogDashboardViewModel {
     private weak var viewController: BlogDashboardViewController?
 
@@ -14,8 +18,6 @@ class BlogDashboardViewModel {
     private let quickLinks = ["Quick Links"]
     private let posts = ["Posts"]
 
-    typealias DataSource = UICollectionViewDiffableDataSource<Section, String>
-    typealias Snapshot = NSDiffableDataSourceSnapshot<Section, String>
     typealias QuickLinksHostCell = HostCollectionViewCell<QuickLinksView>
 
     private let managedObjectContext: NSManagedObjectContext
@@ -28,25 +30,33 @@ class BlogDashboardViewModel {
         return DashboardServiceRemote(wordPressComRestApi: api)
     }()
 
-    private lazy var dataSource: DataSource? = {
+    private lazy var dataSource: DashboardDataSource? = {
         guard let viewController = viewController else {
             return nil
         }
 
-        return DataSource(collectionView: viewController.collectionView) { [unowned self] collectionView, indexPath, identifier in
-            switch identifier {
-            case self.quickLinks.first:
-                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: QuickLinksHostCell.defaultReuseID, for: indexPath) as? QuickLinksHostCell
-                cell?.hostedView = QuickLinksView(title: self.quickLinks[indexPath.item])
-                return cell
-            case self.posts.first:
-                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: DashboardPostsCardCell.defaultReuseID, for: indexPath) as? DashboardPostsCardCell
-                cell?.configure(viewController, blog: blog)
-                return cell
-            default:
-                break
-            }
-            return UICollectionViewCell()
+        return DashboardDataSource(collectionView: viewController.collectionView) { [unowned self] collectionView, indexPath, identifier in
+//            switch identifier.id {
+//            case .quickActions:
+//                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: QuickLinksHostCell.defaultReuseID, for: indexPath) as? QuickLinksHostCell
+//                cell?.hostedView = QuickLinksView(title: self.quickLinks[indexPath.item])
+//                return cell
+//            case .drafts:
+//                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: DashboardPostsCardCell.defaultReuseID, for: indexPath) as? DashboardPostsCardCell
+//                cell?.configure(viewController, blog: blog)
+//                return cell
+//            case .scheduled:
+//                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: DashboardPostsCardCell.defaultReuseID, for: indexPath) as? DashboardPostsCardCell
+//                cell?.configure(viewController, blog: blog)
+//                return cell
+//            }
+
+            
+            let cellType = identifier.id.cell
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellType.defaultReuseID, for: indexPath)
+            (cell as? BlogDashboardCardConfigurable)?.configure(blog: blog, viewController: viewController)
+
+            return cell
         }
     }()
 
@@ -65,9 +75,9 @@ class BlogDashboardViewModel {
         viewController?.showLoading()
         applySnapshotForInitialData()
 
-        service.fetch(cards: ["posts", "todays_stats"], forBlogID: dotComID, success: { [weak self] _ in
+        service.fetch(cards: DashboardCard.allCases.filter { $0.isRemote }.compactMap { $0.remoteIdentifier }, forBlogID: dotComID, success: { [weak self] cards in
             self?.viewController?.stopLoading()
-            self?.applySnapshotWithMockedData()
+            self?.applySnapshotWith(cards: cards)
         }, failure: { _ in
 
         })
@@ -80,15 +90,11 @@ private extension BlogDashboardViewModel {
     // This is necessary when using an IntrinsicCollectionView
     // Otherwise, the collection view will never update its height
     func applySnapshotForInitialData() {
-        let snapshot = Snapshot()
+        let snapshot = DashboardSnapshot()
         dataSource?.apply(snapshot, animatingDifferences: false)
     }
 
-    func applySnapshotWithMockedData() {
-        var snapshot = Snapshot()
-        snapshot.appendSections(Section.allCases)
-        snapshot.appendItems(quickLinks, toSection: Section.quickLinks)
-        snapshot.appendItems(posts, toSection: Section.posts)
-        dataSource?.apply(snapshot, animatingDifferences: false)
+    func applySnapshotWith(cards: NSDictionary) {
+        dataSource?.apply(BlogDashboardParser().parse(cards: cards), animatingDifferences: false)
     }
 }

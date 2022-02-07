@@ -57,8 +57,11 @@ final class BlogDashboardViewController: UIViewController {
     private func setupCollectionView() {
         collectionView.isScrollEnabled = false
         collectionView.backgroundColor = .listBackground
-        collectionView.register(QuickLinksHostCell.self, forCellWithReuseIdentifier: QuickLinksHostCell.defaultReuseID)
-        collectionView.register(DashboardPostsCardCell.self, forCellWithReuseIdentifier: DashboardPostsCardCell.defaultReuseID)
+
+        /// Register all cells
+        DashboardCard.allCases.forEach { card in
+            collectionView.register(card.cell, forCellWithReuseIdentifier: card.cell.defaultReuseID)
+        }
 
         view.addSubview(collectionView)
         view.pinSubviewToAllEdges(collectionView)
@@ -69,7 +72,7 @@ final class BlogDashboardViewController: UIViewController {
     }
 
     @objc private func updateCollectionViewHeight(notification: Notification) {
-        collectionView.collectionViewLayout.invalidateLayout()
+//        collectionView.collectionViewLayout.invalidateLayout()
     }
 }
 

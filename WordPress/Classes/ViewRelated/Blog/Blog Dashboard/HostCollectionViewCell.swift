@@ -11,7 +11,11 @@ protocol Hostable {
 ///
 /// Create a HostCollectionViewCell when you want to integrate SwiftUI views into a UIKit view hierarchy.
 /// At creation time, specify the SwiftUI view you want to use as the content view for this cell.
-class HostCollectionViewCell<Content>: UICollectionViewCell, Hostable where Content: View {
+class HostCollectionViewCell<Content>: UICollectionViewCell, Hostable, BlogDashboardCardConfigurable where Content: View {
+    func configure(blog: Blog, viewController: BlogDashboardViewController?) {
+        hostedView = QuickLinksView(title: "Quick Links") as! Content
+    }
+
 
     var hostController: UIHostingController<Content>?
 
