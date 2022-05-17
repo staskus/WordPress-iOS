@@ -300,6 +300,7 @@ static NSInteger const WPTabBarIconOffsetiPhone = 5;
 
 - (void)showReaderTab
 {
+
     [self setSelectedIndex:WPTabReader];
 }
 
@@ -446,6 +447,39 @@ static NSInteger const WPTabBarIconOffsetiPhone = 5;
 - (BOOL)tabBarController:(UITabBarController *)tabBarController shouldSelectViewController:(UIViewController *)viewController
 {
     NSUInteger selectedIndex = [tabBarController.viewControllers indexOfObject:viewController];
+
+    if(![AppConfiguration isJetpack]){
+        BOOL installed = [JetpackMigrator jetpackAppInstalled];
+        BOOL handled = false;
+
+        switch (selectedIndex) {
+            case WPTabReader: {
+                if(installed){
+                    [JetpackMigrator openReader];
+                } else {
+                    [JetpackMigrator promptToInstallFrom:tabBarController];
+                }
+                handled = true;
+                break;
+            }
+            case WPTabNotifications: {
+                if(installed){
+                    [JetpackMigrator openNotifications];
+                } else {
+                    [JetpackMigrator promptToInstallFrom:tabBarController];
+                }
+                handled = true;
+                break;
+            }
+            default:
+                handled = false;
+                break;
+        }
+
+        if(handled) {
+            return false;
+        }
+    }
 
     // If we're selecting a new tab...
     if (selectedIndex != tabBarController.selectedIndex) {
