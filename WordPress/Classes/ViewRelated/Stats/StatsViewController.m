@@ -37,6 +37,19 @@ static NSString *const StatsBlogObjectURLRestorationKey = @"StatsBlogObjectURL";
 
 + (void)showForBlog:(Blog *)blog from:(UIViewController *)controller
 {
+    if(![AppConfiguration isJetpack]){
+        BOOL installed = [JetpackMigrator jetpackAppInstalled];
+
+        if(installed) {
+            [JetpackMigrator openStatsFor:blog];
+            return;
+        }
+        
+        [JetpackMigrator promptToInstallFrom:controller];
+
+        return;
+    }
+
     StatsViewController *statsController = [StatsViewController new];
     statsController.blog = blog;
     statsController.navigationItem.largeTitleDisplayMode = UINavigationItemLargeTitleDisplayModeNever;

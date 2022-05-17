@@ -1524,7 +1524,20 @@ NSString * const WPCalypsoDashboardPath = @"https://wordpress.com/stats/";
 }
 
 - (void)showStatsFromSource:(BlogDetailsNavigationSource)source
-{    
+{
+    if(![AppConfiguration isJetpack]){
+        BOOL installed = [JetpackMigrator jetpackAppInstalled];
+
+        if(installed) {
+            [JetpackMigrator openStatsFor:self.blog];
+            return;
+        }
+
+        [JetpackMigrator promptToInstallFrom:self];
+
+        return;
+    }
+
     [self trackEvent:WPAnalyticsStatStatsAccessed fromSource:source];
     StatsViewController *statsView = [StatsViewController new];
     statsView.blog = self.blog;
