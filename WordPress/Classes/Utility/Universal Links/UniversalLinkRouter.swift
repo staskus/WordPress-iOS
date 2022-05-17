@@ -120,8 +120,12 @@ struct UniversalLinkRouter: LinkRouter {
             return matcherCanHandle
         }
 
-        // If there's a hostname, check it's WordPress.com
-        return scheme == "https" && host == "wordpress.com" && matcherCanHandle
+        guard scheme == WPComScheme else {
+            // If there's a hostname, check it's WordPress.com
+            return scheme == "https" && host == "wordpress.com" && matcherCanHandle
+        }
+
+        return matcherCanHandle
     }
 
     /// Attempts to find a route that matches the url's path, and perform its

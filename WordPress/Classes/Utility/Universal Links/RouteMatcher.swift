@@ -28,13 +28,19 @@ class RouteMatcher {
         return routes.compactMap({ route in
             let values = valuesDictionary(forURL: url)
 
+            var path = (url.path.isEmpty ? url.host : url.path) ?? ""
+            if !path.hasPrefix("/") {
+                path = "/" + path
+            }
             // If the paths are the same, we definitely have a match
-            if route.path == url.path {
+            print(route.path, path)
+
+            if route.path == path {
                 return route.matched(with: values)
             }
 
             let routeComponents = route.components
-
+            
             // Ensure the paths have the same number of components
             guard routeComponents.count == pathComponents.count else {
                 return nil
