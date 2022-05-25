@@ -89,7 +89,7 @@ class StatsTotalInsightsCell: StatsBaseCell {
 
         graphView.data = sparklineData ?? []
         graphView.chartColor = chartColor(for: difference ?? 0)
-        
+
         countLabel.text = count.abbreviatedString()
 
         guard let difference = difference,
