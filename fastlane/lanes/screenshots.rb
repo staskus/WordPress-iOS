@@ -61,10 +61,10 @@ platform :ios do
         concurrent_simulators: true,
 
         devices: [
-          'iPhone Xs Max',
-          'iPhone 8 Plus',
-          'iPad Pro (12.9-inch) (2nd generation)',
-          'iPad Pro (12.9-inch) (3rd generation)'
+          'iPhone 13 Pro Max',
+          'iPhone 11 Pro',
+          'iPad Pro (12.9-inch) (4th generation)',
+          'iPad Pro (12.9-inch) (5th generation)'
         ]
       )
     end
