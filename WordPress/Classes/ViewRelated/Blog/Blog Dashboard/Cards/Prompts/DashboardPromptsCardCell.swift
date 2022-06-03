@@ -286,10 +286,10 @@ class DashboardPromptsCardCell: UICollectionViewCell, Reusable {
         ]
 
         if removeFromDashboardEnabled {
-            return [defaultItems, [.remove(removeMenuTapped)]]
+            return [defaultItems, [.learnMore(learnMoreTapped), .remove(removeMenuTapped)]]
         }
 
-        return [defaultItems]
+        return [defaultItems, [.learnMore(learnMoreTapped)]]
     }
 
     @available(iOS 15.0, *)
@@ -457,6 +457,11 @@ private extension DashboardPromptsCardCell {
         // TODO.
     }
 
+    func learnMoreTapped() {
+        WPAnalytics.track(.promptsDashboardCardMenuLearnMore)
+        presenterViewController?.present(BloggingPromptsFeatureIntroduction.navigationController(interactionType: .informational), animated: true)
+    }
+
     // Fallback context menu implementation for iOS 13.
     func showMenuSheet() {
         guard let presenterViewController = presenterViewController else {
@@ -518,6 +523,7 @@ private extension DashboardPromptsCardCell {
         case viewMore(_ handler: () -> Void)
         case skip(_ handler: () -> Void)
         case remove(_ handler: () -> Void)
+        case learnMore(_ handler: () -> Void)
 
         var title: String {
             switch self {
@@ -527,6 +533,8 @@ private extension DashboardPromptsCardCell {
                 return NSLocalizedString("Skip this prompt", comment: "Menu title to skip today's prompt.")
             case .remove:
                 return NSLocalizedString("Remove from dashboard", comment: "Destructive menu title to remove the prompt card from the dashboard.")
+            case .learnMore:
+                return NSLocalizedString("Learn more", comment: "Menu title to show the prompts feature introduction modal.")
             }
         }
 
@@ -538,6 +546,8 @@ private extension DashboardPromptsCardCell {
                 return .init(systemName: "xmark.circle")
             case .remove:
                 return .init(systemName: "minus.circle")
+            case .learnMore:
+                return .init(systemName: "info.circle")
             }
         }
 
@@ -553,20 +563,27 @@ private extension DashboardPromptsCardCell {
         var toAction: UIAction {
             switch self {
             case .viewMore(let handler),
-                    .skip(let handler),
-                    .remove(let handler):
-                return .init(title: title, image: image, attributes: menuAttributes, handler: { _ in
+                 .skip(let handler),
+                 .remove(let handler),
+                 .learnMore(let handler):
+                return UIAction(title: title, image: image, attributes: menuAttributes) { _ in
                     handler()
-                })
+                }
             }
         }
 
         var toMenuSheetItem: MenuSheetViewController.MenuItem {
             switch self {
             case .viewMore(let handler),
-                    .skip(let handler),
-                    .remove(let handler):
-                return .init(title: title, image: image, destructive: menuAttributes.contains(.destructive), handler: handler)
+                 .skip(let handler),
+                 .remove(let handler),
+                 .learnMore(let handler):
+                return MenuSheetViewController.MenuItem(
+                        title: title,
+                        image: image,
+                        destructive: menuAttributes.contains(.destructive),
+                        handler: handler
+                )
             }
         }
     }
