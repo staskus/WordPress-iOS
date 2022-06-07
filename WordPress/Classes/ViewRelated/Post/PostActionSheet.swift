@@ -45,7 +45,7 @@ class PostActionSheet {
                     }
                 case .duplicate:
                     actionSheetController.addDefaultActionWithTitle(Titles.duplicate) { [weak self] _ in
-                        self?.interactivePostViewDelegate?.duplicate(post)
+                        self?.interactivePostViewDelegate?.duplicatePost(post)
                     }
                 case .publish:
                     actionSheetController.addDefaultActionWithTitle(Titles.publish) { [weak self] _ in

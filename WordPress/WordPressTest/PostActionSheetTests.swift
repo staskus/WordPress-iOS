@@ -203,7 +203,17 @@ class InteractivePostViewDelegateMock: InteractivePostViewDelegate {
         didCallHandleStats = true
     }
 
-    func duplicate(_ post: AbstractPost) {
+    // We'd like the signature to be `duplicate(_ post:)`, but Xcode 14.0 beta 1 gives the
+    // following build error:
+    //
+    // > Method 'duplicate' with Objective-C selector 'duplicate:' conflicts with method
+    // > 'duplicate' from superclass 'UIResponder' with the same Objective-C selector
+    //
+    // Not sure whether that's a beta issue or a legitimate error. There doesn't seem to be any
+    // `duplicate` method in the `UIResponder` documentation—unless that's a private method?
+    //
+    // See https://developer.apple.com/documentation/uikit/uiresponder
+    func duplicatePost(_ post: AbstractPost) {
         didCallHandleDuplicate = true
     }
 
